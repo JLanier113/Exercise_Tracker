@@ -76,12 +76,12 @@ app.post(
     }
     /*$push is a mongoDB function to add to database arrays*/
     User.findByIdAndUpdate(
-      req.body.id,
+      req.params._id,
       { $push: { log: newExercise } },
       { new: true },
       (error, updatedUser) => {
         let responseObject = {};
-        responseObject["_id"] = updatedUser.id;
+        responseObject["_id"] = updatedUser._id;
         responseObject["username"] = updatedUser.username;
         responseObject["date"] = new Date(newExercise.date).toDateString();
         responseObject["description"] = newExercise.description;
@@ -91,3 +91,37 @@ app.post(
     );
   }
 );
+
+app.get("/api/users/:_id/logs", (req, res) => {
+  User.findById(req.params._id, (error, result) => {
+    if (!error) {
+      let responseObject = result;
+
+      if (req.query.from || req.query.to) {
+        let fromDate = new Date(0);
+        let toDate = new Date();
+
+        if (req.query.from) {
+          fromDate = new Date(req.query.from);
+        }
+        if (req.query.to) {
+          toDate = new Date(req.query.to);
+        }
+        fromDate = fromDate.getTime();
+        toDate = toDate.getTime();
+
+        responseObjectObject.log = responseObject.log.filter((Exercise) => {
+          let exerciseDate = new Date(Exercise.date).getTime();
+
+          return exerciseDate >= fromDate && exerciseDate <= toDate;
+        });
+      }
+      if (req.query.limit) {
+        responseObject.log = responseObject.log.slice(0, req.query.limit);
+      }
+
+      responseObject["count"] = result.log.length;
+      res.json(responseObject);
+    }
+  });
+});
