@@ -13,6 +13,7 @@ require("dotenv").config();
 app.use(cors());
 app.use(express.static("public"));
 app.get("/", (req, res) => {
+  console.log("Directory name: " + __dirname);
   res.sendFile(__dirname + "/views/index.html");
 });
 
